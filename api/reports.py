@@ -22,7 +22,7 @@ async def get_all_reports(
 
 @router.post("")
 async def post_report(files: list[UploadFile] = File(...)):
-    return await ReportService().post_report(files)
+    return await ReportService.post_report(files)
 
 
 @router.post("upload")
