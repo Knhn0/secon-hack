@@ -1,7 +1,9 @@
 from fastapi import APIRouter, UploadFile, File, Query
 
+from api.dependencies import UOWDep
 from services.reports import ReportService
 from services.storage import StorageService
+from utils.unitofwork import IUnitOfWork
 
 router = APIRouter(prefix="/report", tags=["Reports"])
 
@@ -10,12 +12,17 @@ router = APIRouter(prefix="/report", tags=["Reports"])
 async def get_report(
         report_id: int
 ):
-    return await ReportService.get_report(report_id)
+    return await ReportService().get_report(report_id)
 
+
+@router.get("/all")
+async def get_all_reports(
+        uow: UOWDep):
+    return await ReportService().get_all(uow)
 
 @router.post("")
 async def post_report(files: list[UploadFile] = File(...)):
-    return await ReportService.post_report(files)
+    return await ReportService().post_report(files)
 
 
 @router.post("upload")

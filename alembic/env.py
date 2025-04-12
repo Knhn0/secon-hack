@@ -6,6 +6,7 @@ import config as config_env
 from alembic import context
 from db.db import Base
 from models.users import Users
+from models.reports import Reports
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -16,6 +16,9 @@ class ReportService:
         await uow.commit()
         return report_id
 
+    async def get_all(self, uow: IUnitOfWork):
+        return await uow.reports.find_all()
+
     @staticmethod
     async def post_report(files: List[UploadFile]):
         merged_df = pd.DataFrame()

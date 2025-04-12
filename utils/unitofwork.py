@@ -39,6 +39,7 @@ class UnitOfWork(IUnitOfWork):
     async def __aenter__(self):
         self.session = self.session_factory()
         self.users = UsersRepository(self.session)
+        self.reports = ReportsRepository(self.session)
         return self
 
     async def __aexit__(self, *args):
