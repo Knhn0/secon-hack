@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: Api
+    environment:
+      USE_DOCKER: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    networks:
+      - backend
+    depends_on:
+      - db
+
+  db:
+    container_name: FastApiDb
+    image: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  db-data:

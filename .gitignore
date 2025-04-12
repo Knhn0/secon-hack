@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+*.log
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Byte-compiled / cache
+.cache/
+.pytest_cache/
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+
+# Migrations (если alembic используется)
+migrations/__pycache__/
+migrations/versions/__pycache__/
+
+# Test coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# MyPy
+.mypy_cache/
+
+# FastAPI static/cache/temp if any
+static/
+media/
+
+# If you use Jupyter
+.ipynb_checkpoints/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Pydantic
+*.json
