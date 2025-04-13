@@ -85,3 +85,11 @@ class StorageService:
         )
         response.headers["Content-Disposition"] = "attachment; filename=archive.zip"
         return response
+
+
+    async def get_link(self, name: str):
+        try:
+            download_url = minio_client.presigned_get_object(config.MINIO_BUCKET, name)
+            return download_url
+        except Exception:
+            raise HTTPException(status_code=400)

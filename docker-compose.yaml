@@ -36,13 +36,13 @@ services:
     restart: always
     ports:
       - "9000:9000"
-      - "7000:7000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: "admin"
       MINIO_ROOT_PASSWORD: "veryhardpassword"
       MINIO_DEFAULT_BUCKETS: "main"
       MINIO_API_PORT_NUMBER: "9000"
-      MINIO_CONSOLE_PORT_NUMBER: "7000"
+      MINIO_CONSOLE_PORT_NUMBER: "9001"
     volumes:
       - minio-data:/bitnami/minio/data
 
