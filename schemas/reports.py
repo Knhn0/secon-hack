@@ -32,3 +32,13 @@ class ReportBase(BaseModel):
     file_ids: Annotated[
         List[int]
     ]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class FileResponse(BaseModel):
+    id: int
+    name: str
+    extension: str
+    url: str

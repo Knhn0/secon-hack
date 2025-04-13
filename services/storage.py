@@ -1,42 +1,51 @@
 import io
 import zipfile
-import boto3
-from botocore.exceptions import BotoCoreError, NoCredentialsError
+import minio
 from fastapi import UploadFile, File, HTTPException, status, Query
+from minio import S3Error
 from starlette.responses import StreamingResponse
 
 import config
+from schemas.reports import FileResponse
 
-s3_client = boto3.client(
-    "s3",
-    aws_access_key_id=config.S3_ACCESS_KEY_ID,  # замените на свой access key
-    aws_secret_access_key=config.S3_SECRET_KEY,  # замените на свой secret key
-    region_name="ru-msk",
-    endpoint_url=config.S3_URL
+minio_client = minio.Minio(
+    access_key=config.MINIO_ACCESS_KEY,
+    secret_key=config.MINIO_SECRET_KEY,
+    secure=False,
+    endpoint=config.MINIO_ENDPOINT
 )
 
 
 class StorageService:
-    async def upload_file(self, bucket_name: str, file: UploadFile = File(...)):
-        try:
-            content = await file.read()
-            s3_client.put_object(Bucket=bucket_name, Key=file.filename, Body=content, ACL='public-read')
-        except BotoCoreError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
-    def generate_presigned_url(self, filename):
+    async def upload_file(self, file: UploadFile = File(...)):
         try:
-            url = s3_client.generate_presigned_url(
-                'get_object',
-                Params={
-                    'Bucket': "secon2025",
-                    'Key': filename,
-                    'ResponseContentDisposition': f'attachment; filename="{filename}"'
-                },
+            file_bytes = await file.read()
+            file_size = len(file_bytes)
+
+            data_stream = io.BytesIO(file_bytes)
+
+            result = minio_client.put_object(
+                config.MINIO_BUCKET,
+                file.filename,
+                data=data_stream,
+                length=file_size,
+                content_type=file.content_type
             )
-            return url
-        except NoCredentialsError:
-            return "Ошибка: Учетные данные не найдены."
+
+            return {
+                "message": "Файл успешно загружен",
+                "filename": file.filename
+            }
+        except S3Error as err:
+            raise HTTPException(status_code=500, detail=f"Ошибка при загрузке в MinIO: {err}")
+
+    async def delete_file(self, filename: str):
+        try:
+            minio_client.remove_object(config.MINIO_BUCKET, filename)
+            return {"message": f"Файл '{filename}' успешно удалён"}
+        except S3Error as err:
+            raise HTTPException(status_code=500, detail=f"Ошибка удаления файла: {err}")
 
     async def download_archive(
             self,
@@ -45,7 +54,6 @@ class StorageService:
                 description="Список ключей файлов, которые необходимо включить в архив"
             )
     ):
-        bucket_name = "secon2025"  # Имя вашего бакета в S3
 
         zip_in_memory = io.BytesIO()
 
@@ -53,7 +61,7 @@ class StorageService:
             with zipfile.ZipFile(zip_in_memory, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
                 for key in keys:
                     try:
-                        response = s3_client.get_object(Bucket=bucket_name, Key=key)
+                        response = minio_client.get_object(config.MINIO_BUCKET, key)
                         file_content = response["Body"].read()
                     except Exception as e:
                         raise HTTPException(
