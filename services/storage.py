@@ -57,10 +57,8 @@ class StorageService:
 
         try:
             with zipfile.ZipFile(zip_in_memory, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-                # Создаем структуру папок в архиве
                 folders = ["эксели/", "фотки/принятые/", "фотки/не принятые/"]
                 for folder in folders:
-                    # Пустая запись для создания "папки"
                     zf.writestr(folder, "")
 
                 for key in keys:
@@ -74,20 +72,16 @@ class StorageService:
                         )
                     filename = key.split("/")[-1]
 
-                    # Определяем папку назначения по расширению/названию
                     if filename.lower().endswith((".xls", ".xlsx")):
                         folder = "эксели/"
                     elif filename.lower().endswith((".jpg", ".jpeg", ".png")):
-                        # Если в названии файла есть слово "принят" (в нижнем регистре), помещаем в папку "принятые"
                         if "принят" in filename.lower():
                             folder = "фотки/принятые/"
                         else:
                             folder = "фотки/не принятые/"
                     else:
-                        # Если расширение не соответствует известным, файл сохраняем в корне архива
                         folder = ""
 
-                    # Записываем файл в архив по соответствующему пути
                     archive_path = f"{folder}{filename}"
                     zf.writestr(archive_path, file_content)
         except Exception as e:

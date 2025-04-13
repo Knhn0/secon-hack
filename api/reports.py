@@ -24,12 +24,7 @@ async def get_all_reports(
 
 @router.post("")
 async def post_report(files: list[UploadFile] = File(...)):
-    return await ReportService.post_report(files)
-
-
-@router.post("upload")
-async def post_file(filename: str):
-    return StorageService().generate_presigned_url(filename)
+    return await ReportService().post_report(files)
 
 
 @router.get("zip")
@@ -40,6 +35,3 @@ async def get_zip(keys: list[str] = Query(
     return await StorageService().download_archive(keys)
 
 
-@router.post("/upload/")
-async def upload_file(file: UploadFile = File(...)):
-    return await StorageService().upload(file)

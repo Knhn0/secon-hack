@@ -30,34 +30,36 @@ services:
       - "5432:5432"
     networks:
       - backend
-#
-#  minio:
-#    image: bitnami/minio:2024.11.7
-#    restart: always
-#    ports:
-#      - "9000:9000"
-#      - "9001:9001"
-#    environment:
-#      MINIO_ROOT_USER: "admin"
-#      MINIO_ROOT_PASSWORD: "veryhardpassword"
-#      MINIO_DEFAULT_BUCKETS: "main"
-#      MINIO_API_PORT_NUMBER: "9000"
-#      MINIO_CONSOLE_PORT_NUMBER: "9001"
-#    volumes:
-#      - minio-data:/bitnami/minio/data
-#
-#  nginx:
-#    image: 'jc21/nginx-proxy-manager:latest'
-#    restart: unless-stopped
-#    ports:
-#      - '80:80'
-#      - '443:443'
-#      - '81:81'
-#    volumes:
-#      - ./data:/data
-#      - ./letsencrypt:/etc/letsencrypt
-#    networks:
-#      - backend
+
+  minio:
+    image: bitnami/minio:2024.11.7
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: "admin"
+      MINIO_ROOT_PASSWORD: "veryhardpassword"
+      MINIO_DEFAULT_BUCKETS: "main"
+      MINIO_API_PORT_NUMBER: "9000"
+      MINIO_CONSOLE_PORT_NUMBER: "9001"
+      MINIO_ACCESS_KEY: "QPiuyDGCxblPpLED8CUb"
+      MINIO_SECRET_KEY: "A6AYTbKANJkaFxx23cqWKp5y83gRQ8oqTwbRwQPB"
+    volumes:
+      - minio-data:/bitnami/minio/data
+
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - backend
 
 networks:
   backend:

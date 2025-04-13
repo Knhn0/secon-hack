@@ -47,8 +47,8 @@ class ReportService:
                         wb.save(filename)
                         break
 
-    async def post_report(files: List[UploadFile]):
-        jpgNames = List[str]
+    async def post_report(self, files: list[UploadFile]):
+        jpgNames = []
         for file in files:
             if file.filename.endswith((".xls", ".xlsx")):
                 continue
@@ -56,11 +56,12 @@ class ReportService:
             if recognized_text == "Номер не найден":
                 file.filename = f"unrecognized_number_{file.filename}"
             else:
-                jpgNames.append(file.filename)
+                file.filename = f"approved.{file.filename}"
+            jpgNames.append(file.filename)
             await StorageService().upload_file(file)
 
         for file in files:
             if file.filename.endswith('.xlsx'):
-                await ReportService.update_excel(file.filename, jpgNames)
+                await ReportService().update_excel(file.filename, jpgNames)
                 await StorageService().upload_file(file)
         return http.HTTPStatus.OK

@@ -2,19 +2,21 @@ import cv2
 import os
 import numpy as np
 from ultralytics import YOLO
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 import easyocr
 
+# Определяем абсолютный путь до модели
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(CURRENT_DIR, "..", "ai_model", "best.pt")
 
 yolo = YOLO(model_path)
 
-reader = easyocr.Reader(['en'], gpu=False, recog_network="english_g2", user_network_directory="../ai-model")
+# Обратите внимание на имя папки: если в структуре проекта папка называется "ai_model",
+# замените "../ai-model" на "../ai_model"
+reader = easyocr.Reader(['en'], gpu=False, recog_network="english_g2", user_network_directory="../ai_model")
 
 
 class AIService:
-
     def detect_and_crop(self, image: np.ndarray, yolo_model: YOLO, conf_threshold: float = 0.5) -> np.ndarray:
         """
         Запускает YOLO для поиска объекта на изображении.
@@ -74,12 +76,11 @@ class AIService:
         else:
             return raw_text
 
-    def best_rotation_for_easyocr(self, img: np.ndarray, yolo_model: YOLO, conf_threshold: float = 0.5) -> (
-    str, np.ndarray):
+    def best_rotation_for_easyocr(self, img: np.ndarray, yolo_model: YOLO, conf_threshold: float = 0.5) -> (str, np.ndarray):
         """
         Для изображения пробует несколько вариантов:
           1. Сначала выполняется детекция и обрезка через detect_and_crop.
-          2. Если YOLO не нашёл объект, возвращается ("Номер не найден", исходное изображение).
+          2. Если YOLO не нашёл объект, выбрасывает исключение HTTPException с кодом 404.
           3. Если обрезанная область получена, для вариантов поворота (0°, 90°, 270°) выполняется OCR.
           4. Выбирается вариант с максимальной длиной распознанного текста.
         Возвращает кортеж: (распознанный текст, обработанное изображение).
@@ -87,7 +88,7 @@ class AIService:
         cropped = self.detect_and_crop(img, yolo_model, conf_threshold)
         if cropped is None:
             print("[DEBUG] Объект не найден")
-            return "Номер не найден", img
+            raise HTTPException(status_code=404, detail="Объект не найден")
         h, w = cropped.shape[:2]
         candidates = []
         processed_imgs = {}
@@ -118,13 +119,13 @@ class AIService:
         """
         Эндпоинт принимает файл, преобразует его в numpy-массив,
         затем вызывает best_rotation_for_easyocr для детекции/обрезки и OCR.
-        Если YOLO не обнаруживает номер, возвращает JSON с информацией об ошибке.
-        Иначе возвращает обрезанное изображение (без аннотации) в виде JPEG.
+        Если YOLO не обнаруживает номер, генерируется HTTPException с кодом 404.
+        Иначе возвращается распознанный текст.
         """
         contents = await file.read()
         nparr = np.frombuffer(contents, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        recognized_text, processed_img = self.best_rotation_for_easyocr(image, yolo, conf_threshold)
+        recognized_text, _ = self.best_rotation_for_easyocr(image, yolo, conf_threshold)
 
         return recognized_text
