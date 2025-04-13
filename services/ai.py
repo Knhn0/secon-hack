@@ -1,15 +1,12 @@
 import cv2
 import numpy as np
-import torch
 from ultralytics import YOLO
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import StreamingResponse, JSONResponse
-from io import BytesIO
 import easyocr
 
-yolo = YOLO("../secon-hack/ai_model/best.pt")
+yolo = YOLO("../ai_model/best.pt")
 
-reader = easyocr.Reader(['en'], gpu=False, recog_network="english_g2", user_network_directory="./ai-model")
+reader = easyocr.Reader(['en'], gpu=False, recog_network="english_g2", user_network_directory="../ai-model")
 
 
 class AIService:

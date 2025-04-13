@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Type
 
 from db.db import async_session_maker
 from repositories.reports import ReportsRepository

@@ -1,9 +1,7 @@
 import http
 
-import pandas as pd
-from fastapi import UploadFile, HTTPException, status
+from fastapi import UploadFile
 from openpyxl.styles import PatternFill, Alignment, Font
-from io import BytesIO
 from typing import List
 from openpyxl import load_workbook
 

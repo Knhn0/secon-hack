@@ -6,7 +6,6 @@ from minio import S3Error
 from starlette.responses import StreamingResponse
 
 import config
-from schemas.reports import FileResponse
 
 minio_client = minio.Minio(
     access_key=config.MINIO_ACCESS_KEY,

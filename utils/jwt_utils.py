@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 import jwt
 import bcrypt
-from fastapi import HTTPException
-from jwt import ExpiredSignatureError, InvalidTokenError
 
 import config
 from schemas.auth import TokenInfo

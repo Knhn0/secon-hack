@@ -1,6 +1,5 @@
 from fastapi import HTTPException, status
 from schemas.users import UserUpdate
-from schemas.auth import UserRegister
 from utils.unitofwork import IUnitOfWork
 
 
