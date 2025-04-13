@@ -1,10 +1,14 @@
 import cv2
+import os
 import numpy as np
 from ultralytics import YOLO
 from fastapi import FastAPI, UploadFile, File
 import easyocr
 
-yolo = YOLO("../ai_model/best.pt")
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(CURRENT_DIR, "..", "ai_model", "best.pt")
+
+yolo = YOLO(model_path)
 
 reader = easyocr.Reader(['en'], gpu=False, recog_network="english_g2", user_network_directory="../ai-model")
 
