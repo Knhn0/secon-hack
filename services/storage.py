@@ -54,11 +54,16 @@ class StorageService:
                 description="Список ключей файлов, которые необходимо включить в архив"
             )
     ):
-
         zip_in_memory = io.BytesIO()
 
         try:
             with zipfile.ZipFile(zip_in_memory, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+                # Создаем структуру папок в архиве
+                folders = ["эксели/", "фотки/принятые/", "фотки/не принятые/"]
+                for folder in folders:
+                    # Пустая запись для создания "папки"
+                    zf.writestr(folder, "")
+
                 for key in keys:
                     try:
                         response = minio_client.get_object(config.MINIO_BUCKET, key)
@@ -68,9 +73,24 @@ class StorageService:
                             status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Не удалось получить файл '{key}': {e}"
                         )
-                    filename_in_zip = key.split("/")[-1]
-                    zf.writestr("БЛЯЯЯ/", "")
-                    zf.writestr(f"БЛЯЯЯ/{filename_in_zip}", file_content)
+                    filename = key.split("/")[-1]
+
+                    # Определяем папку назначения по расширению/названию
+                    if filename.lower().endswith((".xls", ".xlsx")):
+                        folder = "эксели/"
+                    elif filename.lower().endswith((".jpg", ".jpeg", ".png")):
+                        # Если в названии файла есть слово "принят" (в нижнем регистре), помещаем в папку "принятые"
+                        if "принят" in filename.lower():
+                            folder = "фотки/принятые/"
+                        else:
+                            folder = "фотки/не принятые/"
+                    else:
+                        # Если расширение не соответствует известным, файл сохраняем в корне архива
+                        folder = ""
+
+                    # Записываем файл в архив по соответствующему пути
+                    archive_path = f"{folder}{filename}"
+                    zf.writestr(archive_path, file_content)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
