@@ -46,6 +46,8 @@ coverage.xml
 static/
 media/
 
+data/nginx
+letsencrypt
 # If you use Jupyter
 .ipynb_checkpoints/
 
