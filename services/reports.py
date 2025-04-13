@@ -3,7 +3,6 @@ import http
 import pandas as pd
 from fastapi import UploadFile, HTTPException, status
 from openpyxl.styles import PatternFill, Alignment, Font
-from io import BytesIO
 from typing import List
 from openpyxl import load_workbook
 
